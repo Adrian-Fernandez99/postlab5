@@ -49,7 +49,7 @@ int main(void)
 
 		PWM_1 = (ADC_servo1 * 4000UL) / 1023 + 1000;
 		PWM_2 = (ADC_servo2 * 4000UL) / 1023 + 1000;
-		LED_TMR = (ADC_led * 50UL) / 1023;
+		LED_TMR = (ADC_led * 255UL) / 1023;
 		
 		OCR1A = PWM_1;
 		OCR1B = PWM_2;
@@ -88,7 +88,7 @@ void TMR0_init()
 	
 	TCCR0B = (1 << CS02) | (1 << CS00); // Prescaler 1024
 	TIMSK0 = (1 << TOIE0);
-	TCNT0 = 158;
+	TCNT0 = 255;
 }
 
 void LED_ON()
@@ -123,7 +123,7 @@ ISR(TIMER0_OVF_vect)
 		momento = 0;  // Encender LED
 	}
 	
-	TCNT0 = LED_TMR;  // Precarga el timer
+	TCNT0 = 255;  // Precarga el timer
 	
 	sei();
 }

@@ -11,6 +11,6 @@
 
 #include <avr/io.h>
 
-void map_led(uint16_t ADC_var, uint8_t TMR_val);
+void map_led(uint8_t ADC_var, uint8_t *TMR_val);
 
 #endif /* PWM_MANUAL_H_ */

@@ -1,4 +1,3 @@
-
 /*
 Universidad del Valle de Guatemala
 IE2023 : Programación de Microcontroladores
@@ -21,7 +20,6 @@ uso de dos potenciometros ditstintos.
 void PWM_init();
 void ADC_init();
 void TMR0_init();
-void LED_ON();
 uint16_t ADC_read(uint8_t PIN);
 
 uint16_t ADC_servo1 = 0;
@@ -33,6 +31,7 @@ uint16_t PWM_2 = 0;
 uint8_t LED_TMR = 0;
 
 uint8_t momento = 0;
+uint8_t TMR_val = 254;
 
 // MAIN LOOP
 int main(void)
@@ -43,18 +42,18 @@ int main(void)
 
 	while (1)
 	{
+		sei();
 		ADC_servo1 = ADC_read(6);
 		ADC_servo2 = ADC_read(7);
-		ADC_led = ADC_read(5);
 
-		PWM_1 = (ADC_servo1 * 4000UL) / 1023 + 1000;
-		PWM_2 = (ADC_servo2 * 4000UL) / 1023 + 1000;
-		LED_TMR = (ADC_led * 255UL) / 1023;
+		map_servo(uint16_t ADC_servo1, uint16_t &PWM_1);
+		map_servo(uint16_t ADC_servo2, uint16_t &PWM_2);
 		
 		OCR1A = PWM_1;
 		OCR1B = PWM_2;
 		
-		LED_ON();
+		ADC_led = ADC_read(5);
+		map_led(uint16_t ADC_led, uint8_t &TMR_val);
 
 		_delay_ms(20);
 	}
@@ -86,21 +85,9 @@ void TMR0_init()
 	CLKPR	= (1 << CLKPCE); // Habilitar cambio en el prescaler
 	CLKPR	= (1 << CLKPS2); // Setea presc a 16 para 1Mhz
 	
-	TCCR0B = (1 << CS02) | (1 << CS00); // Prescaler 1024
+	TCCR0B = (1 << CS01) | (1 << CS00); // Prescaler 1024
 	TIMSK0 = (1 << TOIE0);
-	TCNT0 = 255;
-}
-
-void LED_ON()
-{
-	if (momento < LED_TMR)
-	{
-		PORTD |= (1 << PORTD2);  // Encender LED
-	}
-	else
-	{
-		PORTD &= ~(1 << PORTD2); // Apagar LED
-	}
+	TCNT0 = TMR_val;
 }
 
 uint16_t ADC_read(uint8_t PIN)
@@ -123,7 +110,16 @@ ISR(TIMER0_OVF_vect)
 		momento = 0;  // Encender LED
 	}
 	
-	TCNT0 = 255;  // Precarga el timer
+	if (momento < LED_TMR)
+	{
+		PORTD |= (1 << PORTD2);  // Encender LED
+	}
+	else
+	{
+		PORTD &= ~(1 << PORTD2); // Apagar LED
+	}
+	
+	TCNT0 = TMR_val;  // Precarga el timer
 	
 	sei();
 }

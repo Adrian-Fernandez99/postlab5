@@ -7,7 +7,7 @@
 
 #include "PWM_manual.h"
 
-void map_led(uint8_t ADC_var, uint8_t *TMR_val)
+void map_led(uint16_t ADC_var, uint8_t *TMR_val)
 {
-		TMR_val = ADC_var;
+	TMR_val = (ADC_var * 254UL) / 1023;
 }
